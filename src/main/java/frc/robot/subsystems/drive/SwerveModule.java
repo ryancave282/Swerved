@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -60,6 +60,10 @@ public class SwerveModule {
     private ShuffleboardValue<Double> turnPositionWriter;
     private ShuffleboardValue<Double> drivePositionWriter;
 
+
+    MagnetSensorConfigs magnetSensorConfigs = new MagnetSensorConfigs();
+    SwerveModuleState desiredState = new SwerveModuleState();
+
     public SwerveModule(int driveMotorId, 
         int turnMotorId, Direction driveMotorReversed, 
         Direction turningMotorReversed, int absoluteEncoderId, 
@@ -76,7 +80,7 @@ public class SwerveModule {
         config.MagnetSensor.MagnetOffset = absoluteEncoderOffsetRad.get()/Constants.TURN_ENCODER_ROT_2_RAD;
         // config.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
 
-        config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = AbsoluteSensorDiscontinuityPoint.Unsigned_360;
+        config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = magnetSensorConfigs.AbsoluteSensorDiscontinuityPoint;
         turnEncoder.getConfigurator().apply(config);
 
         driveMotor = TalonEx.create(driveMotorId)
@@ -140,11 +144,12 @@ public class SwerveModule {
         }
     
         public void setState(SwerveModuleState state) {
+            this.desiredState = state;
             if (Math.abs(state.speedMetersPerSecond) < 0.001) {
                 stop();
                 return;
             }
-            state = SwerveModuleState.optimize(state, getState().angle);
+            desiredState.optimize(getState().angle);
             driveMotor.setPower(state.speedMetersPerSecond / Constants.PHYSICAL_MAX_SPEED_METERS_PER_SECOND);
             turnMotor.setPower((turningPidController.calculate(getTurningPosition(), state.angle.getRadians()))*1);
             SmartDashboard.putString("Swerve[" + turnEncoder.getDeviceID() + "] state", state.   toString());
@@ -152,11 +157,12 @@ public class SwerveModule {
         }
     
         public void setFeedforwardState(SwerveModuleState state) {
+            this.desiredState = state;
             if (Math.abs(state.speedMetersPerSecond) < 0.001) {
                 stop();
                 return;
             }
-            state = SwerveModuleState.optimize(state, getState().angle);
+            desiredState.optimize(getState().angle);
             driveMotor.setVoltage(feedforward.calculate(state.speedMetersPerSecond));
             turnMotor.setPower(turningPidController.calculate(getTurningPosition(), state.angle.getRadians()));
             SmartDashboard.putString("Swerve[" + turnEncoder.getDeviceID() + "] state", state.toString());

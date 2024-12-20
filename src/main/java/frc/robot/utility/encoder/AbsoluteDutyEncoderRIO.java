@@ -33,10 +33,12 @@ public class AbsoluteDutyEncoderRIO {
     }
     public class OffsetWriter {
         public BaseWriter withOffset(double offset) {
-            encoder.setPositionOffset(offset/(2*Math.PI));
+            // Set the position offset manually
+            AbsoluteDutyEncoderRIO.this.setPositionOffset(offset / (2 * Math.PI));
             return new BaseWriter();
         }
     }
+    
     public class BaseWriter {
         @SuppressWarnings("unchecked")
         public <T extends AbsoluteDutyEncoderRIO> T withSubsystemBase(String subsystemBaseName) {
@@ -76,12 +78,18 @@ public class AbsoluteDutyEncoderRIO {
         return getPosition()*(2*Math.PI);
     }
 
+    private double positionOffset = 0.0;
+    
+    public void setPositionOffset(double offset) {
+        positionOffset = offset;
+    }
+    
     /**
      * 
      * @return The Absolute Position of the Encoder 
      */
     public double getPosition(){
-        double givenPos = encoder.getAbsolutePosition();
+        double givenPos = encoder.get();
         if(isInverted){ //To invert values based on direction - Works
             givenPos = 1-givenPos;
         }
@@ -92,7 +100,9 @@ public class AbsoluteDutyEncoderRIO {
             //^^ In this case the givePos will be negative; or 1-Math.abs(givenPos)
         }
 
+        double adjustedPosition = (givenPos - positionOffset + 1.0) % 1.0;
+
         
-        return givenPos-encoder.getPositionOffset();
+        return adjustedPosition;
     }
 }
