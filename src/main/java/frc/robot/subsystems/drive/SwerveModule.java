@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -151,6 +152,7 @@ public class SwerveModule {
                 return;
             }
             desiredState.optimize(getState().angle);
+            desiredState.optimize(getState().angle);
             driveMotor.setPower(state.speedMetersPerSecond / Constants.PHYSICAL_MAX_SPEED_METERS_PER_SECOND);
             turnMotor.setPower((turningPidController.calculate(getTurningPosition(), desiredState.angle.getRadians()))*1);
             SmartDashboard.putString("Swerve[" + turnEncoder.getDeviceID() + "] state", desiredState.toString());
@@ -163,6 +165,7 @@ public class SwerveModule {
                 stop();
                 return;
             }
+            desiredState.optimize(getState().angle);
             desiredState.optimize(getState().angle);
             driveMotor.setVoltage(feedforward.calculate(state.speedMetersPerSecond));
             turnMotor.setPower(turningPidController.calculate(getTurningPosition(), desiredState.angle.getRadians()));
