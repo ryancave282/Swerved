@@ -118,6 +118,9 @@ public class SparkMaxEx extends CANMotorEx{
     public void setSupplyCurrentLimit(double currentLimit) {
         config.smartCurrentLimit((int) currentLimit);
     }
+
+    public void setStatorCurrentLimit(double currentLimit) {
+    }
         
     public double getVoltage(){
         // return motor.getAppliedOutput();//motor controller's applied output duty cycle.

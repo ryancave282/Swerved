@@ -98,8 +98,8 @@ public class SwerveModule {
             .withIdleMode(ZeroPowerMode.Coast)
             .withPositionConversionFactor(Constants.TURN_ENCODER_ROT_2_RAD)
             .withSubsystemName("Swerve")
-            .withIsEnabled(isEnabled);
-        turnMotor.setSupplyCurrentLimit(80);
+            .withIsEnabled(isEnabled)
+            .withSupplyCurrentLimit(80);
         
         turningPidController = new PIDController(SwerveDriveConfig.TURN_KP.getValue(), 0.0, 0.0);
         turningPidController.enableContinuousInput(0, 2*Math.PI);//Was  -Math.PI, Math.PI but changed to 0 and 2PI
